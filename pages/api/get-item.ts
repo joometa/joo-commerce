@@ -20,7 +20,6 @@ async function getItem() {
         },
       ],
     });
-    console.log('RESPONSE :', response);
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${JSON.stringify(err)}`);

@@ -1,8 +1,10 @@
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
+
 import Head from 'next/head';
 import Image from 'next/image';
-// import { Inter } from '@next/font/google'
-import styles from '../styles/Home.module.css';
 import { useEffect, useRef, useState } from 'react';
+import styles from '../styles/Home.module.css';
 
 // const inter = Inter({ subsets: ['latin'] })
 
@@ -42,17 +44,34 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div>
-          <input ref={inputRef} type="text" placeholder="Input Item" />
-          <button onClick={handleClick}>Add Jacket</button>
+          <input
+            className="placeholder:italic placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-3 pr-3 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+            ref={inputRef}
+            placeholder="Input Item"
+            type="text"
+            name="search"
+          />
+          <button
+            css={css`
+              padding: 15px;
+              background-color: lightblue;
+            `}
+            onClick={handleClick}
+          >
+            Add item
+          </button>
         </div>
 
         <div>
-          <h3>Products List</h3>
+          <h2>Products List</h2>
           {products &&
-            products.map((items) => {
+            products.map(({ properties, id, created_time }) => {
               return (
-                <div key={items}>
-                  {JSON.stringify(items)}
+                <div key={id}>
+                  {properties?.product_name?.title[0]?.text?.content || ''}
+                  {' ['}
+                  {created_time}
+                  {'] '}
                   <br />
                   <br />
                 </div>
