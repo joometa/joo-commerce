@@ -1,6 +1,4 @@
-/** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
@@ -12,13 +10,21 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetch('/api/get-item')
-      .then((response) => response.json())
-      .then((data) => {
-        setProducts(data.items);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch('/api/get-item')
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setProducts(data.items);
+  //     });
+  // }, []);
+
+  // useEffect(() => {
+  //   fetch('/api/get-products')
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setProducts(data.items);
+  //     });
+  // }, []);
 
   const handleClick = () => {
     if (inputRef.current == null || !inputRef.current.value) {
@@ -65,6 +71,13 @@ export default function Home() {
         <div>
           <h2>Products List</h2>
           {products &&
+            products.map((item) => (
+              <div key={item.id}>
+                {item.name}
+                <span>{item.createdAt}</span>
+              </div>
+            ))}
+          {/* {products &&
             products.map(({ properties, id, created_time }) => {
               return (
                 <div key={id}>
@@ -76,7 +89,7 @@ export default function Home() {
                   <br />
                 </div>
               );
-            })}
+            })} */}
         </div>
       </main>
     </>
