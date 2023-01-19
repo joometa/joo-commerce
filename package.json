@@ -11,6 +11,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@mantine/core": "^5.10.1",
+    "@mantine/hooks": "^5.10.1",
     "@notionhq/client": "^2.2.3",
     "@prisma/client": "^4.8.1",
     "@types/node": "^18.11.18",
