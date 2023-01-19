@@ -1,8 +1,9 @@
-// import ImageGallery from 'react-image-gallery';
-// import Image from 'next/image';
+import CustomEditor from 'components/Editor';
+import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import Carousel from 'nuka-carousel';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const images = [
   {
@@ -24,7 +25,32 @@ const images = [
 ];
 
 export default function Products() {
+  const router = useRouter();
+  const { id: productId } = router.query;
+
+  // const [editState, setEditState] = useState<any>(undefined);
+  const [editorState, setEditorState] = useState<EditorState | undefined>(
+    undefined
+  );
   const [index, setIndex] = useState<number>(0);
+
+  useEffect(() => {
+    if (productId != null) {
+      fetch(`/api/get-product?id=${productId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.items.contents) {
+            setEditorState(
+              EditorState.createWithContent(
+                convertFromRaw(JSON.parse(data.items.contents))
+              )
+            );
+          } else {
+            setEditorState(EditorState.createEmpty());
+          }
+        });
+    }
+  }, [productId]);
 
   return (
     <>
@@ -43,7 +69,7 @@ export default function Products() {
             alt="image"
             width={1000}
             height={600}
-            // layout="responsive"
+            layout="responsive"
           />
         ))}
       </Carousel>
@@ -61,6 +87,9 @@ export default function Products() {
           />
         ))}
       </div>
+      {editorState != null && (
+        <CustomEditor editorState={editorState} readOnly />
+      )}
     </>
   );
 }

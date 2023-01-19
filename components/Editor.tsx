@@ -5,17 +5,17 @@ import { EditorProps, EditorState } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from './Button';
 
+const Editor = dynamic<EditorProps>(
+  () => import('react-draft-wysiwyg').then((mod) => mod.Editor),
+  { ssr: false }
+);
+
 interface CustomEditorProps {
   editorState?: EditorState;
   readOnly?: boolean;
   onEditorStateChange?: Dispatch<SetStateAction<EditorState | undefined>>;
   onSave?: () => void;
 }
-
-const Editor = dynamic<EditorProps>(
-  () => import('react-draft-wysiwyg').then((mod) => mod.Editor),
-  { ssr: false }
-);
 
 export default function CustomEditor({
   editorState,
@@ -38,6 +38,7 @@ export default function CustomEditor({
         localization={{ locale: 'ko' }}
         onEditorStateChange={onEditorStateChange}
       />
+      {/* {!readOnly && <Button onClick={onSave}>저장</Button>} */}
       {!readOnly && <Button onClick={onSave}>저장</Button>}
     </Wrapper>
   );

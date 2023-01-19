@@ -1,10 +1,9 @@
 import CustomEditor from 'components/Editor';
-import { convertFromRaw } from 'draft-js';
+import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Carousel from 'nuka-carousel';
 import { useEffect, useState } from 'react';
-import { EditorState } from 'react-draft-wysiwyg';
 
 const images = [
   {
@@ -29,25 +28,42 @@ export default function Products() {
   const router = useRouter();
   const { id: productId } = router.query;
 
-  const [editState, setEditState] = useState<EditorState | undefined>(
+  // const [editState, setEditState] = useState<any>(undefined);
+  const [editorState, setEditorState] = useState<EditorState | undefined>(
     undefined
   );
   const [index, setIndex] = useState<number>(0);
 
-  const handleSave = () => {};
-  console.log({ EditorState });
+  const handleSave = () => {
+    console.log('????');
+    if (editorState) {
+      fetch('/api/update-product', {
+        method: 'POST',
+        body: JSON.stringify({
+          id: productId,
+          contents: JSON.stringify(
+            convertToRaw(editorState.getCurrentContent())
+          ),
+        }),
+      })
+        .then((res) => res.json())
+        .then(() => alert('Success updating contents'));
+    }
+  };
 
   useEffect(() => {
-    console.log({ productId });
     if (productId != null) {
       fetch(`/api/get-product?id=${productId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.items.contents) {
-            // setEditState(data.items.contents);
+            setEditorState(
+              EditorState.createWithContent(
+                convertFromRaw(JSON.parse(data.items.contents))
+              )
+            );
           } else {
-            console.log('fuck');
-            // setEditState();
+            setEditorState(EditorState.createEmpty());
           }
         });
     }
@@ -88,18 +104,13 @@ export default function Products() {
           />
         ))}
       </div>
-      {editState != null && (
+      {editorState != null && (
         <CustomEditor
-          editorState={editState}
-          onEditorStateChange={setEditState}
+          editorState={editorState}
+          onEditorStateChange={setEditorState}
           onSave={handleSave}
         />
       )}
-      <CustomEditor
-        editorState={editState}
-        onEditorStateChange={setEditState}
-        onSave={handleSave}
-      />
     </>
   );
 }
