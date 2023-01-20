@@ -1,8 +1,7 @@
 import { products } from '@prisma/client';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-
-const TAKE = 9;
+import { TAKE } from '@constants/products';
 
 export default function Products() {
   const [skip, setSkip] = useState(0);

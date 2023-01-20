@@ -5,7 +5,7 @@ const nextConfig = {
     emotion: true,
   },
   images: {
-    domains: ['picsum.photos'],
+    domains: ['picsum.photos', 'contents.lotteon.com', 'images.footlocker.com'],
   },
 };
 
