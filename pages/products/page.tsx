@@ -6,22 +6,61 @@ import { TAKE, CATEGORY_MAP, FILTERS } from '@constants/products';
 import { SegmentedControl, Select } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
 import useDebounce from '@hooks/useDebounce';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Products() {
   const [activePage, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [products, setProducts] = useState<products[]>([]);
-  const [categories, setCategories] = useState<categories[]>([]);
+  // const [total, setTotal] = useState(0);
+  // const [products, setProducts] = useState<products[]>([]);
+  // const [categories, setCategories] = useState<categories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string>('-1');
   const [selectedFilter, setSelectedFilter] = useState<string>('latest');
   const [keyword, setKeyword] = useState<string>('');
 
   const debouncedKeyword = useDebounce<string>(keyword);
 
-  const categoryOptions = useMemo(() => {
-    if (categories.length === 0) return [];
+  const { data: categories } = useQuery<{ items: categories[] }, unknown, any>(
+    ['/api/get-categories'],
+    () => fetch('/api/get-categories').then((res) => res.json()),
+    { select: (data) => data.items }
+  );
 
-    const result = categories.map((category) => ({
+  const { data: total } = useQuery<number, unknown, any>(
+    [
+      `/api/get-products-count?category=${selectedCategories}&contains=${debouncedKeyword}`,
+    ],
+    () =>
+      fetch(
+        `/api/get-products-count?category=${selectedCategories}&contains=${debouncedKeyword}`
+      )
+        .then((res) => res.json())
+        .then((data) => Math.ceil(data.items / TAKE))
+  );
+
+  const { data: products } = useQuery<
+    { items: products[] },
+    unknown,
+    products[]
+  >(
+    [
+      `/api/get-products?skip=${
+        TAKE * (activePage - 1)
+      }&take=${TAKE}&category=${selectedCategories}&orderBy=${selectedFilter}&contains=${debouncedKeyword}`,
+    ],
+    () => {
+      const SKIP = TAKE * (activePage - 1);
+      const response = fetch(
+        `/api/get-products?skip=${SKIP}&take=${TAKE}&category=${selectedCategories}&orderBy=${selectedFilter}&contains=${debouncedKeyword}`
+      ).then((res) => res.json());
+      return response;
+    },
+    { select: (data) => data.items }
+  );
+
+  const categoryOptions = useMemo(() => {
+    if (!categories || categories.length === 0) return [];
+
+    const result = categories.map((category: categories) => ({
       label: category.name,
       value: String(category.id),
     }));
@@ -39,33 +78,13 @@ export default function Products() {
     setKeyword(e.target.value);
   };
 
-  useEffect(() => {
-    fetch('/api/get-categories')
-      .then((res) => res.json())
-      .then((data) => {
-        setCategories(data.items);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetch(
-      `/api/get-products-count?category=${selectedCategories}&contains=${debouncedKeyword}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const TOTAL_COUNT = Math.ceil(data.items / TAKE);
-        setTotal(TOTAL_COUNT);
-      });
-  }, [selectedCategories, debouncedKeyword]);
-
-  useEffect(() => {
-    const SKIP = TAKE * (activePage - 1);
-    fetch(
-      `/api/get-products?skip=${SKIP}&take=${TAKE}&category=${selectedCategories}&orderBy=${selectedFilter}&contains=${debouncedKeyword}`
-    )
-      .then((res) => res.json())
-      .then((data) => setProducts(data.items));
-  }, [activePage, selectedCategories, selectedFilter, debouncedKeyword]);
+  // useEffect(() => {
+  //   fetch('/api/get-categories')
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setCategories(data.items);
+  //     });
+  // }, []);
 
   return (
     <div className="px-36 mt-36 mb-36">
