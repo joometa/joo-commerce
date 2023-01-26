@@ -1,9 +1,11 @@
 import { categories, products } from '@prisma/client';
 import React, { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Pagination } from '@mantine/core';
+import { Input, Pagination } from '@mantine/core';
 import { TAKE, CATEGORY_MAP, FILTERS } from '@constants/products';
 import { SegmentedControl, Select } from '@mantine/core';
+import { IconSearch } from '@tabler/icons';
+import useDebounce from '@hooks/useDebounce';
 
 export default function Products() {
   const [activePage, setPage] = useState(1);
@@ -12,6 +14,9 @@ export default function Products() {
   const [categories, setCategories] = useState<categories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string>('-1');
   const [selectedFilter, setSelectedFilter] = useState<string>('latest');
+  const [keyword, setKeyword] = useState<string>('');
+
+  const debouncedKeyword = useDebounce<string>(keyword);
 
   const categoryOptions = useMemo(() => {
     if (categories.length === 0) return [];
@@ -30,6 +35,10 @@ export default function Products() {
     activePage !== 1 && setPage(1);
   };
 
+  const handleChangeKeyword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setKeyword(e.target.value);
+  };
+
   useEffect(() => {
     fetch('/api/get-categories')
       .then((res) => res.json())
@@ -39,25 +48,36 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/get-products-count?category=${selectedCategories}`)
+    fetch(
+      `/api/get-products-count?category=${selectedCategories}&contains=${debouncedKeyword}`
+    )
       .then((res) => res.json())
       .then((data) => {
         const TOTAL_COUNT = Math.ceil(data.items / TAKE);
         setTotal(TOTAL_COUNT);
       });
-  }, [selectedCategories]);
+  }, [selectedCategories, debouncedKeyword]);
 
   useEffect(() => {
     const SKIP = TAKE * (activePage - 1);
     fetch(
-      `/api/get-products?skip=${SKIP}&take=${TAKE}&category=${selectedCategories}&orderBy=${selectedFilter}`
+      `/api/get-products?skip=${SKIP}&take=${TAKE}&category=${selectedCategories}&orderBy=${selectedFilter}&contains=${debouncedKeyword}`
     )
       .then((res) => res.json())
       .then((data) => setProducts(data.items));
-  }, [activePage, selectedCategories, selectedFilter]);
+  }, [activePage, selectedCategories, selectedFilter, debouncedKeyword]);
 
   return (
     <div className="px-36 mt-36 mb-36">
+      <div className="mb-4">
+        <Input
+          icon={<IconSearch />}
+          placeholder="Search"
+          value={keyword}
+          onChange={handleChangeKeyword}
+        />
+      </div>
+
       <div className="mb-4">
         <Select
           value={selectedFilter}

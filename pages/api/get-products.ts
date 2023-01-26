@@ -6,17 +6,29 @@ import { getOrderBy } from '@constants/products';
 
 const prisma = new PrismaClient();
 
-async function getProducts(
-  skip: number,
-  take: number,
-  category: number,
-  orderBy: string
-) {
+async function getProducts({
+  skip,
+  take,
+  category,
+  orderBy,
+  contains,
+}: {
+  skip: number;
+  take: number;
+  category: number;
+  orderBy: string;
+  contains: string;
+}) {
+  const containsCondition =
+    contains && contains !== '' ? { name: { contains } } : undefined;
   const where =
     category && category !== -1
       ? {
           category_id: category,
+          ...containsCondition,
         }
+      : containsCondition
+      ? containsCondition
       : undefined;
 
   const orderByCondition = getOrderBy(orderBy);
@@ -44,7 +56,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { skip, take, category, orderBy } = req.query;
+  const { skip, take, category, orderBy, contains } = req.query;
 
   if (skip == null || take == null || category == null || orderBy == null) {
     res.status(400).json({ message: 'Check query parameters plz' });
@@ -52,12 +64,13 @@ export default async function handler(
   }
 
   try {
-    const products = await getProducts(
-      Number(skip),
-      Number(take),
-      Number(category),
-      String(orderBy)
-    );
+    const products = await getProducts({
+      skip: Number(skip),
+      take: Number(take),
+      category: Number(category),
+      orderBy: String(orderBy),
+      contains: String(contains),
+    });
     res.status(200).json({ items: products, message: `Success` });
   } catch (error) {
     res.status(500).json({ message: `Faild` });
