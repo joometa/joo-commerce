@@ -1,6 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// refetch 명령어 : yarn prisma generate
+// push 명령어 : yarn prisma db push
+
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["referentialIntegrity"]
@@ -27,4 +30,11 @@ model products {
   createdAt DateTime @default(now())
 
   @@index([category_id])
+}
+
+model user {
+  id String @id @default(cuid())
+  name String?
+  email String? @unique
+  image String?
 }
