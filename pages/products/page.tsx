@@ -7,15 +7,14 @@ import { SegmentedControl, Select } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
 import useDebounce from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 
 export default function Products() {
   const [activePage, setPage] = useState(1);
-  // const [total, setTotal] = useState(0);
-  // const [products, setProducts] = useState<products[]>([]);
-  // const [categories, setCategories] = useState<categories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string>('-1');
   const [selectedFilter, setSelectedFilter] = useState<string>('latest');
   const [keyword, setKeyword] = useState<string>('');
+  const { data: session } = useSession();
 
   const debouncedKeyword = useDebounce<string>(keyword);
 
@@ -78,16 +77,9 @@ export default function Products() {
     setKeyword(e.target.value);
   };
 
-  // useEffect(() => {
-  //   fetch('/api/get-categories')
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setCategories(data.items);
-  //     });
-  // }, []);
-
   return (
     <div className="px-36 mt-36 mb-36">
+      {session && <p>안녕하세요, {session.user?.name} 님</p>}
       <div className="mb-4">
         <Input
           icon={<IconSearch />}
