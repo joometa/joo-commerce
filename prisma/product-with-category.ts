@@ -13,11 +13,30 @@ const productData: Prisma.productsCreateInput[] = [
 ];
 
 async function main() {
+  const CATEGORY_MAP = ['Sneakers', 'T-Shirt', 'Pants', 'Cap', 'Hoodie'];
+  CATEGORY_MAP.forEach(async (c, i) => {
+    const category = await prisma.categories.upsert({
+      where: {
+        id: i + 1,
+      },
+      update: {
+        name: c,
+      },
+      create: {
+        name: c,
+      },
+    });
+    console.log(`Upsert category id : ${category.id}`);
+  });
+
   await prisma.products.deleteMany({});
 
   for (const p of productData) {
+    // contents 너무길다고 prisma에서 에러나서 잠시 뺌
+    const { contents, ...withoutContent } = p;
+
     const product = await prisma.products.create({
-      data: p,
+      data: withoutContent,
     });
     console.log(`Created id : ${product.id}`);
   }
