@@ -88,3 +88,11 @@ model VerificationToken {
   userId String @unique
   productIds String
  }
+
+ model Cart {
+  id Int @id @default(autoincrement())
+  userId String
+  productId Int
+  quantity Int
+  amount Int
+ }

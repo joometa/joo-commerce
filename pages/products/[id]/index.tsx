@@ -1,7 +1,7 @@
 import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
-import { products } from '@prisma/client';
+import { Cart, products } from '@prisma/client';
 import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
 import {
   QueryClient,
@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Carousel from 'nuka-carousel';
+import { CART_QUERY_KEY } from 'pages/cart';
 import { useEffect, useMemo, useState } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -88,13 +89,35 @@ export default function Products(props: {
       },
     }
   );
+  const { mutate: fetchAddCart } = useMutation<
+    unknown,
+    unknown,
+    Omit<Cart, 'id' | 'userId'>,
+    any
+  >(
+    (item) =>
+      fetch('/api/add-cart', {
+        method: 'POST',
+        body: JSON.stringify({ item }),
+      })
+        .then((res) => res.json())
+        .then((res) => res),
+    {
+      onMutate: () => {
+        queryClient.invalidateQueries([CART_QUERY_KEY]);
+      },
+      onSuccess: () => {
+        router.push('/cart');
+      },
+    }
+  );
 
   const isWished = useMemo(() => {
     if (!wishlist) return false;
     return wishlist.includes(productId);
   }, [wishlist, productId]);
 
-  const handleClickCart = () => {
+  const handleClickCart = async () => {
     if (session == null) {
       alert('로그인이 필요한 기능입니다.');
       router.push('/auth/login');
@@ -115,9 +138,17 @@ export default function Products(props: {
   };
 
   const validate = (type: 'cart' | 'order') => {
-    alert('장바구니로 이동');
-    // TODO : 장바구니에 등록하는 기능 추가
-    router.push('/cart');
+    if (quantity == null) {
+      alert('최소 수량을 선택하세요.');
+      return;
+    }
+    if (type === 'cart') {
+      fetchAddCart({
+        productId: product.id,
+        quantity: quantity || 1,
+        amount: product.price * (quantity || 1),
+      });
+    }
   };
 
   if (product == null || productId == null) {
@@ -181,7 +212,7 @@ export default function Products(props: {
           <Button
             disabled={wishlist == null}
             leftIcon={<IconShoppingCart size={20} stroke={1.5} />}
-            style={{ backgroundColor: isWished ? '#2979ff' : 'lightgray' }}
+            style={{ backgroundColor: '#2979ff' }}
             size="md"
             radius={8}
             styles={{

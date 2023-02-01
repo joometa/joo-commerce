@@ -2,53 +2,34 @@ import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import styled from '@emotion/styled';
 import { Button } from '@mantine/core';
-import { products } from '@prisma/client';
+import { Cart, products } from '@prisma/client';
 import { IconRefresh, IconX } from '@tabler/icons';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 
-interface CartItem {
+interface CartItem extends Cart {
   name: string;
-  productId: number;
   price: number;
-  quantity: number;
-  amount: number;
   image_url: string;
 }
 
-const mockData = [
-  {
-    name: '빛나는 등짝',
-    productId: 100,
-    price: 20000,
-    quantity: 1,
-    amount: 20000,
-    image_url:
-      'https://contents.lotteon.com/itemimage/_v174449/LO/19/73/58/58/25/_1/97/35/85/82/6/LO1973585825_1973585826_1.jpg/dims/optimize/dims/resizemc/500x500',
-  },
-  {
-    name: '타락한 곰돌이 후드',
-    productId: 91,
-    price: 143200,
-    quantity: 2,
-    amount: 286400,
-    image_url:
-      'https://contents.lotteon.com/itemimage/_v154347/LE/12/08/71/72/82/_1/24/72/84/27/9/LE1208717282_1247284279_1.jpg/dims/optimize/dims/resizemc/500x500',
-  },
-];
+export const CART_QUERY_KEY = '/api/get-cart';
 
-export default function Cart() {
+export default function CartPage() {
   const router = useRouter();
-  const [data, setData] = useState<CartItem[]>(mockData);
 
-  const amount = useMemo(() => {
-    return data.map((data) => data.amount).reduce((pre, cur) => pre + cur, 0);
-  }, [data]);
-
-  const deliveryAmount = 5000;
-  const discountAmout = 0;
+  const { data: cartItems } = useQuery<
+    { items: CartItem[] },
+    unknown,
+    CartItem[]
+  >([CART_QUERY_KEY], () => {
+    const response = fetch(CART_QUERY_KEY)
+      .then((res) => res.json())
+      .then((data) => data.items);
+    return response;
+  });
 
   const { data: products } = useQuery<
     { items: products[] },
@@ -65,19 +46,29 @@ export default function Cart() {
     { select: (data) => data.items }
   );
 
+  const deliveryAmount = cartItems && cartItems.length > 0 ? 5000 : 0;
+  const discountAmout = 0;
+  const amount = useMemo(() => {
+    if (!cartItems) return 0;
+    return cartItems
+      .map((data) => data.amount)
+      .reduce((pre, cur) => pre + cur, 0);
+  }, [cartItems]);
+
   const handleOrder = () => {
     //TODO: 구매하기 기능 구현
-    alert(`장바구니 담긴 물품 ${JSON.stringify(data)} 구매`);
+    alert(`장바구니 담긴 물품 ${JSON.stringify(cartItems)} 구매`);
   };
 
   return (
     <div>
-      <span className="text-2xl mb-3">장바구니 ({data.length})</span>
+      <span className="text-2xl mb-3">
+        장바구니 ({cartItems && cartItems.length})
+      </span>
       <div className="flex">
         <div>
-          {data.map((item, idx) => (
-            <Item key={idx} {...item} />
-          ))}
+          {cartItems &&
+            cartItems.map((item, idx) => <Item key={idx} {...item} />)}
         </div>
         <div className="px-4">
           <div
@@ -159,17 +150,88 @@ export default function Cart() {
 }
 
 const Item = (props: CartItem) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [quantity, setQuantity] = useState<number | undefined>(props.quantity);
   const [amount, setAmount] = useState<number>(props.quantity);
 
-  const handleDelete = () => {
-    //TODO: 장바구니에서 삭제 기능 구현
-    alert(`장바구니에서 ${props.name} 삭제`);
-  };
+  const { mutate: fetchUpdateCart } = useMutation<unknown, unknown, Cart, any>(
+    (item) =>
+      fetch('/api/update-cart', {
+        method: 'POST',
+        body: JSON.stringify({ item }),
+      })
+        .then((res) => res.json())
+        .then((res) => res.items),
+    {
+      onMutate: async (item) => {
+        await queryClient.cancelQueries([CART_QUERY_KEY]);
+
+        const previous = queryClient.getQueryData([CART_QUERY_KEY]);
+        queryClient.setQueryData<Cart[]>([CART_QUERY_KEY], (old) =>
+          old?.filter((c) => c.id !== item.id).concat(item)
+        );
+        return { previous };
+      },
+      onError: (err, _, context) => {
+        queryClient.setQueryData([CART_QUERY_KEY], context?.previous);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([CART_QUERY_KEY]);
+      },
+    }
+  );
+  const { mutate: fetchDeleteCart } = useMutation<
+    unknown,
+    unknown,
+    number,
+    any
+  >(
+    (id) =>
+      fetch('/api/delete-cart', {
+        method: 'POST',
+        body: JSON.stringify({ id }),
+      })
+        .then((res) => res.json())
+        .then((res) => res.items),
+    {
+      onMutate: async (id) => {
+        await queryClient.cancelQueries([CART_QUERY_KEY]);
+
+        const previous = queryClient.getQueryData([CART_QUERY_KEY]);
+        queryClient.setQueryData<Cart[]>([CART_QUERY_KEY], (old) =>
+          old?.filter((c) => c.id !== id)
+        );
+        return { previous };
+      },
+      onError: (err, _, context) => {
+        queryClient.setQueryData([CART_QUERY_KEY], context?.previous);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([CART_QUERY_KEY]);
+      },
+    }
+  );
+
   const handleUpdate = () => {
-    //TODO: 장바구니에서 수정 기능 구현
-    alert(`장바구니에서 ${props.name} 수정`);
+    if (quantity == null) {
+      alert('최소 수량을 선택하세요.');
+      return;
+    }
+    fetchUpdateCart({
+      ...props,
+      quantity: quantity,
+      amount: props.price * quantity,
+    });
+  };
+
+  const handleDelete = async () => {
+    //TODO: 장바구니에서 삭제 기능 구현
+    fetchDeleteCart(props.id, {
+      onSuccess: () => {
+        alert(`${props.name} 상품이 장바구니에서 삭제되었습니다.`);
+      },
+    });
   };
 
   useEffect(() => {
