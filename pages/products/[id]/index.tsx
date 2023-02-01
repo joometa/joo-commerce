@@ -1,7 +1,8 @@
+import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
 import { products } from '@prisma/client';
-import { IconHeart, IconHeartbeat } from '@tabler/icons';
+import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
 import {
   QueryClient,
   useMutation,
@@ -36,10 +37,12 @@ const WISHLIST_QUERY_KEY = '/api/get-wishlist';
 export default function Products(props: {
   product: products & { images: string[] };
 }) {
+  const product = props.product;
   const router = useRouter();
   const { data: session } = useSession();
   const { id: productId } = router.query;
   const queryClient = useQueryClient();
+
   const [editorState] = useState<EditorState | undefined>(() =>
     props.product.contents
       ? EditorState.createWithContent(
@@ -48,7 +51,7 @@ export default function Products(props: {
       : EditorState.createEmpty()
   );
   const [index, setIndex] = useState<number>(0);
-  const product = props.product;
+  const [quantity, setQuantity] = useState<number | undefined>(1);
 
   const { data: wishlist } = useQuery([WISHLIST_QUERY_KEY], () =>
     fetch(WISHLIST_QUERY_KEY)
@@ -91,6 +94,15 @@ export default function Products(props: {
     return wishlist.includes(productId);
   }, [wishlist, productId]);
 
+  const handleClickCart = () => {
+    if (session == null) {
+      alert('로그인이 필요한 기능입니다.');
+      router.push('/auth/login');
+      return;
+    }
+    validate('cart');
+  };
+
   const handleClickWish = () => {
     if (session == null) {
       alert('로그인이 필요한 기능입니다.');
@@ -102,12 +114,18 @@ export default function Products(props: {
     }
   };
 
+  const validate = (type: 'cart' | 'order') => {
+    alert('장바구니로 이동');
+    // TODO : 장바구니에 등록하는 기능 추가
+    router.push('/cart');
+  };
+
   if (product == null || productId == null) {
     return <div>로딩중</div>;
   }
 
   return (
-    <div className="p-24 flex flex-row">
+    <div className="flex flex-row">
       <div style={{ width: '50%', marginRight: 52 }}>
         <Carousel
           animation="zoom"
@@ -153,24 +171,46 @@ export default function Products(props: {
         </div>
         <div className="text-4xl font-semibold">{product.name}</div>
         <div className="text-lg">{product.price.toLocaleString('ko-kr')}원</div>
-        <Button
-          disabled={wishlist == null}
-          leftIcon={
-            isWished ? (
-              <IconHeart size={20} stroke={1.5} />
-            ) : (
-              <IconHeartbeat size={20} stroke={1.5} />
-            )
-          }
-          style={{ backgroundColor: isWished ? '#2979ff' : 'lightgray' }}
-          size="md"
-          styles={{
-            root: { paddingRight: 14, height: 48 },
-          }}
-          onClick={handleClickWish}
-        >
-          찜하기
-        </Button>
+
+        <div className="text-lg">
+          <span>수량</span>
+          <CountControl value={quantity} setValue={setQuantity} max={200} />
+        </div>
+
+        <div className="flex space-x-3">
+          <Button
+            disabled={wishlist == null}
+            leftIcon={<IconShoppingCart size={20} stroke={1.5} />}
+            style={{ backgroundColor: isWished ? '#2979ff' : 'lightgray' }}
+            size="md"
+            radius={8}
+            styles={{
+              root: { paddingRight: 14, height: 48 },
+            }}
+            onClick={handleClickCart}
+          >
+            장바구니
+          </Button>
+          <Button
+            disabled={wishlist == null}
+            leftIcon={
+              isWished ? (
+                <IconHeart size={20} stroke={1.5} />
+              ) : (
+                <IconHeartbeat size={20} stroke={1.5} />
+              )
+            }
+            style={{ backgroundColor: isWished ? '#f05650' : 'lightgray' }}
+            size="md"
+            radius={8}
+            styles={{
+              root: { paddingRight: 14, height: 48 },
+            }}
+            onClick={handleClickWish}
+          >
+            찜하기
+          </Button>
+        </div>
         <div className="text-sm text-zinc-300">
           등록 : {format(new Date(product.createdAt), 'yyyy년 M월 d일')}
         </div>

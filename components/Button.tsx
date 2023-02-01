@@ -12,9 +12,10 @@ export default function Button({ children, onClick }: Props) {
   return (
     <button
       css={css`
-        padding: 15px;
-        background-color: lightblue;
+        padding: 10px 14px;
+        background-color: #2979ff;
         border-radius: 15px;
+        color: #ffffff;
       `}
       onClick={onClick}
     >

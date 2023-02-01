@@ -1,6 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Client } from '@notionhq/client';
 import { PrismaClient } from '@prisma/client';
 import { getOrderBy } from '@constants/products';
 
@@ -40,7 +39,7 @@ async function getProducts({
       where,
       ...orderByCondition,
     });
-    console.log(response);
+    console.log({ where });
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);
@@ -57,8 +56,8 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const { skip, take, category, orderBy, contains } = req.query;
-
-  if (skip == null || take == null || category == null || orderBy == null) {
+  console.log(req.query);
+  if (skip == null || take == null) {
     res.status(400).json({ message: 'Check query parameters plz' });
     return;
   }
@@ -69,7 +68,7 @@ export default async function handler(
       take: Number(take),
       category: Number(category),
       orderBy: String(orderBy),
-      contains: String(contains),
+      contains: contains ? String(contains) : '',
     });
     res.status(200).json({ items: products, message: `Success` });
   } catch (error) {
