@@ -7,7 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 import { SessionProvider } from 'next-auth/react';
 
 export default function App({
@@ -21,15 +21,12 @@ export default function App({
       },
     },
   });
-  const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'undefined';
 
   return (
-    // <GoogleOAuthProvider clientId={CLIENT_ID}>
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
         <Component {...pageProps} />
       </QueryClientProvider>
     </SessionProvider>
-    // </GoogleOAuthProvider>
   );
 }

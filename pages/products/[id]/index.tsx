@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const product = await fetch(
-    `http:localhost:3000/api/get-product?id=${context.params?.id}`
+    `${process.env.NEXTAUTH_URL}/api/get-product?id=${context.params?.id}`
   )
     .then((res) => res.json())
     .then((data) => data.items);
