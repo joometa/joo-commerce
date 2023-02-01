@@ -7,14 +7,36 @@ import { authOptions } from './auth/[...nextauth]';
 
 const prisma = new PrismaClient();
 
-async function getWishlist(userId: string) {
+async function updateWishlist(userId: string, productId: string) {
   try {
-    const response = await prisma.wishlist.findUnique({
+    const wishlist = await prisma.wishlist.findUnique({
       where: {
         userId: userId,
       },
     });
 
+    const originWishlist =
+      wishlist?.productIds != null && wishlist.productIds !== ''
+        ? wishlist.productIds.split(',')
+        : [];
+
+    const isWished = originWishlist.includes(productId);
+    const newWishlist = isWished
+      ? originWishlist.filter((id) => id !== productId)
+      : [...originWishlist, productId];
+
+    const response = await prisma.wishlist.upsert({
+      where: {
+        userId: userId,
+      },
+      update: {
+        productIds: newWishlist.join(','),
+      },
+      create: {
+        userId,
+        productIds: newWishlist.join(','),
+      },
+    });
     console.log(response);
 
     return response?.productIds.split(',');
@@ -33,14 +55,18 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
-
+  const { productId } = JSON.parse(req.body);
+  console.log('왜 undefined?', { productId }, req.body);
   if (session == null) {
     res.status(200).json({ items: [], message: `No Session` });
     return;
   }
 
   try {
-    const wishlist = await getWishlist(String(session.id));
+    const wishlist = await updateWishlist(
+      String(session.id),
+      String(productId)
+    );
     res.status(200).json({ items: wishlist, message: `Success` });
   } catch (error) {
     res.status(500).json({ message: `Faild` });
