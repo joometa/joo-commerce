@@ -17,7 +17,7 @@ export default function CommentEdit() {
       fetch(`/api/update-comment`, {
         method: 'POST',
         body: JSON.stringify({
-          orderItemId: orderItemId,
+          orderItemId: Number(orderItemId),
           rate: rate,
           contents: JSON.stringify(
             convertToRaw(editorState.getCurrentContent())
@@ -26,7 +26,10 @@ export default function CommentEdit() {
         }),
       })
         .then((res) => res.json())
-        .then(() => alert('Success updating contents'));
+        .then(() => {
+          alert('후기 등록 완료');
+          router.back();
+        });
     }
   };
 

@@ -27,8 +27,6 @@ const images = [
 export default function Products() {
   const router = useRouter();
   const { id: productId } = router.query;
-
-  // const [editState, setEditState] = useState<any>(undefined);
   const [editorState, setEditorState] = useState<EditorState | undefined>(
     undefined
   );
