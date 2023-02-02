@@ -28,6 +28,6 @@ export default async function handler(
     const categories = await getCategories();
     res.status(200).json({ items: categories, message: `Success` });
   } catch (error) {
-    res.status(500).json({ message: `Faild` });
+    res.status(500).json({ message: `Failed` });
   }
 }

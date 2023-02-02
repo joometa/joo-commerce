@@ -38,6 +38,6 @@ export default async function handler(
     const wishlist = await getCart(String(session.id));
     res.status(200).json({ items: wishlist, message: `Success` });
   } catch (error) {
-    res.status(500).json({ message: `Faild` });
+    res.status(500).json({ message: `Failed` });
   }
 }

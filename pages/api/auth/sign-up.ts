@@ -50,6 +50,6 @@ export default async function handler(
     const token = await signUp(String(credential));
     res.status(200).json({ items: token, message: `Success` });
   } catch (error) {
-    res.status(500).json({ message: `Faild` });
+    res.status(500).json({ message: `Failed` });
   }
 }

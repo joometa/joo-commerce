@@ -41,6 +41,6 @@ export default async function handler(
     const count = await getProductsCount(Number(category), String(contains));
     res.status(200).json({ items: count, message: `Success` });
   } catch (error) {
-    res.status(500).json({ message: `Faild` });
+    res.status(500).json({ message: `Failed` });
   }
 }

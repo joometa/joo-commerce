@@ -47,6 +47,6 @@ export default async function handler(
     await addItem(String(name));
     res.status(200).json({ message: `Success ${name} ` });
   } catch (error) {
-    res.status(500).json({ message: `Faild ${name} ` });
+    res.status(500).json({ message: `Failed ${name} ` });
   }
 }
