@@ -80,7 +80,7 @@ const DetailItem = (props: OrderDetail) => {
         <IconX className="ml-auto" />
       </div>
       {props.orderItems.map((orderItem, idx) => (
-        <Item key={idx} {...orderItem} />
+        <Item key={idx} {...orderItem} status={props.status} />
       ))}
       <div className="flex mt-4">
         <div className="flex flex-col">
@@ -112,10 +112,14 @@ const DetailItem = (props: OrderDetail) => {
     </div>
   );
 };
-const Item = (props: OrderItemDetail) => {
+const Item = (props: OrderItemDetail & { status: number }) => {
   const router = useRouter();
   const [quantity, setQuantity] = useState<number | undefined>(props.quantity);
   const [amount, setAmount] = useState<number>(props.quantity);
+
+  const handleClickComment = () => {
+    router.push(`/comment/edit?orderItemId=${props.id}`);
+  };
 
   useEffect(() => {
     if (quantity != null) {
@@ -134,15 +138,25 @@ const Item = (props: OrderItemDetail) => {
       />
       <div className="flex flex-col ml-4">
         <span className="font-semibold mb-2">{props.name}</span>
-        <span className="font-semibold mb-2">
+        <span className="mb-auto">
           가격 : {props.price.toLocaleString('ko-kr')} 원
         </span>
         <div className="flex items-center space-x-4">
           <CountControl value={quantity} setValue={setQuantity} />
         </div>
       </div>
-      <div className="flex al-auto space-x-4">
+      <div className="flex flex-col ml-auto space-x-4">
         <span>{amount.toLocaleString('ko-kr')} 원</span>
+        {props.status !== 5 && (
+          <>
+            <Button
+              style={{ backgroundColor: '#2979ff', color: '#ffffff' }}
+              onClick={handleClickComment}
+            >
+              후기 작성
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

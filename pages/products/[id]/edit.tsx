@@ -35,7 +35,6 @@ export default function Products() {
   const [index, setIndex] = useState<number>(0);
 
   const handleSave = () => {
-    console.log('????');
     if (editorState) {
       fetch('/api/update-product', {
         method: 'POST',
