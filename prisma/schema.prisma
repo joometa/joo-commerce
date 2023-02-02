@@ -66,6 +66,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// 사용자 정보
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -83,12 +84,14 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+// 찜하기 목록
  model Wishlist{
   id Int @id @default(autoincrement())
   userId String @unique
   productIds String
  }
 
+// 장바구니
  model Cart {
   id Int @id @default(autoincrement())
   userId String
@@ -96,3 +99,22 @@ model VerificationToken {
   quantity Int
   amount Int
  }
+
+// 주문 상품(개별)
+model OrderItem {
+  id Int @id @default(autoincrement())
+  productId Int
+  quantity Int
+  price Int
+  amount Int
+}
+model Orders {
+  id Int @id @default(autoincrement())
+  userId String
+  orderItemIds String
+  address String?
+  receiver String?
+  phoneNumber String?
+  createdAt DateTime @default(now())
+  status Int
+}

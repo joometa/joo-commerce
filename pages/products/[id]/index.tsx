@@ -1,7 +1,7 @@
 import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
-import { Cart, products } from '@prisma/client';
+import { Cart, OrderItem, products } from '@prisma/client';
 import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
 import {
   QueryClient,
@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Carousel from 'nuka-carousel';
 import { CART_QUERY_KEY } from 'pages/cart';
+import { ORDER_QUERY_KEY } from 'pages/my';
 import { useEffect, useMemo, useState } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -60,7 +61,12 @@ export default function Products(props: {
       .then((data) => data.items)
   );
 
-  const { mutate } = useMutation<unknown, unknown, string, any>(
+  const { mutate: fetchUpdateWishlist } = useMutation<
+    unknown,
+    unknown,
+    string,
+    any
+  >(
     (productId: string) =>
       fetch('/api/update-wishlist', {
         method: 'POST',
@@ -111,11 +117,57 @@ export default function Products(props: {
       },
     }
   );
+  const { mutate: fetchAddOrder } = useMutation<
+    unknown,
+    unknown,
+    Omit<OrderItem, 'id'>[],
+    any
+  >(
+    (items) =>
+      fetch(ORDER_QUERY_KEY, {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      })
+        .then((res) => res.json())
+        .then((res) => res),
+    {
+      onMutate: () => {
+        // queryClient.invalidateQueries([ORDER_QUERY_KEY]);
+      },
+      onSuccess: () => {
+        router.push('/my');
+      },
+    }
+  );
 
   const isWished = useMemo(() => {
     if (!wishlist) return false;
     return wishlist.includes(productId);
   }, [wishlist, productId]);
+
+  const validate = (type: 'cart' | 'order') => {
+    if (quantity == null) {
+      alert('최소 수량을 선택하세요.');
+      return;
+    }
+    if (type === 'cart') {
+      fetchAddCart({
+        productId: product.id,
+        quantity: quantity || 1,
+        amount: product.price * (quantity || 1),
+      });
+    }
+    if (type === 'order') {
+      fetchAddOrder([
+        {
+          productId: product.id,
+          quantity: quantity || 1,
+          amount: product.price * (quantity || 1),
+          price: product.price,
+        },
+      ]);
+    }
+  };
 
   const handleClickCart = async () => {
     if (session == null) {
@@ -133,22 +185,17 @@ export default function Products(props: {
       return;
     }
     if (productId != null) {
-      mutate(String(productId));
+      fetchUpdateWishlist(String(productId));
     }
   };
 
-  const validate = (type: 'cart' | 'order') => {
-    if (quantity == null) {
-      alert('최소 수량을 선택하세요.');
+  const handleClickOrder = () => {
+    if (session == null) {
+      alert('로그인이 필요한 기능입니다.');
+      router.push('/auth/login');
       return;
     }
-    if (type === 'cart') {
-      fetchAddCart({
-        productId: product.id,
-        quantity: quantity || 1,
-        amount: product.price * (quantity || 1),
-      });
-    }
+    validate('order');
   };
 
   if (product == null || productId == null) {
@@ -242,6 +289,19 @@ export default function Products(props: {
             찜하기
           </Button>
         </div>
+
+        <Button
+          style={{ backgroundColor: '#2979ff' }}
+          size="md"
+          radius={8}
+          styles={{
+            root: { paddingRight: 14, height: 48 },
+          }}
+          onClick={handleClickOrder}
+        >
+          구매하기
+        </Button>
+
         <div className="text-sm text-zinc-300">
           등록 : {format(new Date(product.createdAt), 'yyyy년 M월 d일')}
         </div>

@@ -2,12 +2,13 @@ import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import styled from '@emotion/styled';
 import { Button } from '@mantine/core';
-import { Cart, products } from '@prisma/client';
+import { Cart, OrderItem, products } from '@prisma/client';
 import { IconRefresh, IconX } from '@tabler/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import { ORDER_QUERY_KEY } from './my';
 
 interface CartItem extends Cart {
   name: string;
@@ -19,6 +20,7 @@ export const CART_QUERY_KEY = '/api/get-cart';
 
 export default function CartPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: cartItems } = useQuery<
     { items: CartItem[] },
@@ -47,7 +49,7 @@ export default function CartPage() {
   );
 
   const deliveryAmount = cartItems && cartItems.length > 0 ? 5000 : 0;
-  const discountAmout = 0;
+  const discountAmount = 0;
   const amount = useMemo(() => {
     if (!cartItems) return 0;
     return cartItems
@@ -55,9 +57,39 @@ export default function CartPage() {
       .reduce((pre, cur) => pre + cur, 0);
   }, [cartItems]);
 
+  const { mutate: fetchAddOrder } = useMutation<
+    unknown,
+    unknown,
+    Omit<OrderItem, 'id'>[],
+    any
+  >(
+    (items) =>
+      fetch('/api/add-order', {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      })
+        .then((res) => res.json())
+        .then((data) => data.items),
+    {
+      onMutate: () => {
+        queryClient.invalidateQueries([ORDER_QUERY_KEY]);
+      },
+      onSuccess: () => {
+        router.push('/my');
+      },
+    }
+  );
+
   const handleOrder = () => {
-    //TODO: 구매하기 기능 구현
-    alert(`장바구니 담긴 물품 ${JSON.stringify(cartItems)} 구매`);
+    if (cartItems == null) return;
+    fetchAddOrder(
+      cartItems.map((cart) => ({
+        productId: cart.productId,
+        price: cart.price,
+        amount: cart.amount,
+        quantity: cart.quantity,
+      }))
+    );
   };
 
   return (
@@ -67,8 +99,15 @@ export default function CartPage() {
       </span>
       <div className="flex">
         <div>
-          {cartItems &&
-            cartItems.map((item, idx) => <Item key={idx} {...item} />)}
+          {cartItems ? (
+            cartItems.length > 0 ? (
+              cartItems.map((item, idx) => <Item key={idx} {...item} />)
+            ) : (
+              <div>장바구니함이 비었습니다.</div>
+            )
+          ) : (
+            <div>불러오는 중..</div>
+          )}
         </div>
         <div className="px-4">
           <div
@@ -86,12 +125,12 @@ export default function CartPage() {
             </Row>
             <Row>
               <span>할인 금액</span>
-              <span>{discountAmout.toLocaleString('ko-kr')} 원</span>
+              <span>{discountAmount.toLocaleString('ko-kr')} 원</span>
             </Row>
             <Row>
               <span className="font-semibold">결제 금액</span>
               <span className="font-semibold text-red-500">
-                {(amount + deliveryAmount - discountAmout).toLocaleString(
+                {(amount + deliveryAmount - discountAmount).toLocaleString(
                   'ko-kr'
                 )}{' '}
                 원
@@ -209,6 +248,7 @@ const Item = (props: CartItem) => {
       },
       onSuccess: () => {
         queryClient.invalidateQueries([CART_QUERY_KEY]);
+        alert(`${props.name} 상품이 장바구니에서 삭제되었습니다.`);
       },
     }
   );
@@ -226,11 +266,8 @@ const Item = (props: CartItem) => {
   };
 
   const handleDelete = async () => {
-    //TODO: 장바구니에서 삭제 기능 구현
     fetchDeleteCart(props.id, {
-      onSuccess: () => {
-        alert(`${props.name} 상품이 장바구니에서 삭제되었습니다.`);
-      },
+      onSuccess: () => {},
     });
   };
 

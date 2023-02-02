@@ -9,7 +9,7 @@ export default function Header() {
 
   const handleClickHome = () => router.push('/');
   const handleClickUser = () => router.push('/auth/login');
-  const handleClickProfile = () => router.push('/myPage');
+  const handleClickProfile = () => router.push('/my');
   const handleClickCart = () => router.push('/cart');
   const handleClickWishlist = () => router.push('/wishlist');
 
