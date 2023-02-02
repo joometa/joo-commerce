@@ -39,6 +39,6 @@ export default async function handler(
     const products = await getProduct(Number(id));
     res.status(200).json({ items: products, message: `Success` });
   } catch (error) {
-    res.status(500).json({ message: `Faild` });
+    res.status(500).json({ message: `Failed` });
   }
 }
