@@ -1,5 +1,5 @@
 import { categories, products } from '@prisma/client';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Input, Pagination } from '@mantine/core';
 import { TAKE, CATEGORY_MAP, FILTERS } from '@constants/products';
