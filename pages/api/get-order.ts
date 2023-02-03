@@ -47,7 +47,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
-  console.log('session:', session);
+
   if (session == null) {
     res.status(200).json({ items: [], message: `No Session` });
     return;

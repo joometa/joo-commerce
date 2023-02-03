@@ -10,6 +10,7 @@ const nextConfig = {
       'contents.lotteon.com',
       'images.footlocker.com',
       'lh3.googleusercontent.com',
+      'i.ibb.co',
     ],
   },
 };

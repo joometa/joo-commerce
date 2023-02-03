@@ -1,7 +1,8 @@
+import CommentItem from '@components/CommentItem';
 import { CountControl } from '@components/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
-import { Cart, OrderItem, products } from '@prisma/client';
+import { Cart, Comment, OrderItem, products } from '@prisma/client';
 import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
 import {
   QueryClient,
@@ -27,23 +28,37 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   )
     .then((res) => res.json())
     .then((data) => data.items);
+
+  const comments = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/get-comments?productId=${context.params?.id}`
+  )
+    .then((res) => res.json())
+    .then((data) => data.items);
   return {
     props: {
       product: { ...product, images: [product?.image_url, product?.image_url] },
-    }, // will be passed to the page component as props
+      comments: comments,
+    },
   };
 };
 
+export interface CommentItemType extends Comment, OrderItem {}
+
+interface Props {
+  product: products & { images: string[] };
+  comments: CommentItemType[];
+}
+
 const WISHLIST_QUERY_KEY = '/api/get-wishlist';
 
-export default function Products(props: {
-  product: products & { images: string[] };
-}) {
-  const product = props.product;
+export default function Products({ ...props }: Props) {
+  const { product, comments } = props;
   const router = useRouter();
   const { data: session } = useSession();
   const { id: productId } = router.query;
   const queryClient = useQueryClient();
+
+  console.log({ comments });
 
   const [editorState] = useState<EditorState | undefined>(() =>
     props.product.contents
@@ -132,7 +147,7 @@ export default function Products(props: {
         .then((res) => res),
     {
       onMutate: () => {
-        // queryClient.invalidateQueries([ORDER_QUERY_KEY]);
+        queryClient.invalidateQueries([ORDER_QUERY_KEY]);
       },
       onSuccess: () => {
         router.push('/my');
@@ -242,6 +257,16 @@ export default function Products(props: {
         {editorState != null && (
           <CustomEditor editorState={editorState} readOnly />
         )}
+        <div>
+          <p className="text-2xl font-semibold mb-2">후기</p>
+          {comments && comments.length > 0 ? (
+            comments.map((comment, idx) => (
+              <CommentItem key={idx} item={comment} />
+            ))
+          ) : (
+            <div>등록된 후기가 없습니다.</div>
+          )}
+        </div>
       </div>
       <div className="flex flex-col space-y-6">
         <div className="text-lg text-zinc-400">

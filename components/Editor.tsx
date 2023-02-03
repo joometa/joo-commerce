@@ -13,6 +13,7 @@ const Editor = dynamic<EditorProps>(
 interface CustomEditorProps {
   editorState?: EditorState;
   readOnly?: boolean;
+  noPadding?: boolean;
   onEditorStateChange?: Dispatch<SetStateAction<EditorState | undefined>>;
   onSave?: () => void;
 }
@@ -20,11 +21,12 @@ interface CustomEditorProps {
 export default function CustomEditor({
   editorState,
   readOnly = false,
+  noPadding = false,
   onEditorStateChange,
   onSave,
 }: CustomEditorProps) {
   return (
-    <Wrapper readOnly={readOnly}>
+    <Wrapper readOnly={readOnly} noPadding={noPadding}>
       <Editor
         readOnly={readOnly}
         editorState={editorState}
@@ -44,8 +46,8 @@ export default function CustomEditor({
   );
 }
 
-const Wrapper = styled.div<{ readOnly: boolean }>`
-  padding: 16px;
+const Wrapper = styled.div<{ readOnly: boolean; noPadding: boolean }>`
+  ${(props) => (props.noPadding ? '' : 'padding: 16px;')}
   ${(props) =>
     props.readOnly ? '' : 'border: 1px solid black; border-radius: 8px'}
 `;
