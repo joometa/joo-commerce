@@ -70,6 +70,57 @@ export default function MyPage() {
 }
 
 const DetailItem = (props: OrderDetail) => {
+  const queryClient = useQueryClient();
+  const [isPayed, setIsPayed] = useState<boolean>(props.status === 5);
+
+  const { mutate: fetchUpdateOrderStatus } = useMutation<
+    unknown,
+    unknown,
+    OrderDetail,
+    any
+  >(
+    (item) =>
+      fetch('/api/update-order-status', {
+        method: 'POST',
+        body: JSON.stringify({
+          id: props.id,
+          userId: props.userId,
+          isPayed: !isPayed,
+        }),
+      })
+        .then((res) => res.json())
+        .then((res) => res.items),
+    {
+      onMutate: async (item) => {
+        await queryClient.cancelQueries([ORDER_QUERY_KEY]);
+
+        const previous = queryClient.getQueryData([ORDER_QUERY_KEY]);
+        queryClient.setQueryData<OrderDetail[]>([ORDER_QUERY_KEY], (old) =>
+          old?.map((c) => {
+            const status = isPayed ? 5 : 2;
+            if (c.id === item.id) {
+              c.status = status;
+            }
+            return c;
+          })
+        );
+
+        return { previous };
+      },
+      onError: (err, _, context) => {
+        queryClient.setQueryData([ORDER_QUERY_KEY], context?.previous);
+      },
+      onSuccess: () => {
+        setIsPayed(!isPayed);
+        queryClient.invalidateQueries([ORDER_QUERY_KEY]);
+      },
+    }
+  );
+
+  const handleClickPay = async () => {
+    fetchUpdateOrderStatus(props);
+  };
+
   return (
     <div
       className="w-full flex flex-col p-4 rounded-md"
@@ -104,8 +155,11 @@ const DetailItem = (props: OrderDetail) => {
             주문일자 :{' '}
             {format(new Date(props.createdAt), 'yyyy년 M월 d일 HH:mm:ss')}
           </span>
-          <Button style={{ backgroundColor: '#2979ff', color: '#ffffff' }}>
-            구매확정
+          <Button
+            style={{ backgroundColor: '#2979ff', color: '#ffffff' }}
+            onClick={handleClickPay}
+          >
+            {isPayed ? '결제 처리 취소' : '결제 처리'}
           </Button>
         </div>
       </div>
@@ -147,7 +201,8 @@ const Item = (props: OrderItemDetail & { status: number }) => {
       </div>
       <div className="flex flex-col ml-auto space-x-4">
         <span>{amount.toLocaleString('ko-kr')} 원</span>
-        {props.status !== 5 && (
+
+        {props.status === 5 && (
           <>
             <Button
               style={{ backgroundColor: '#2979ff', color: '#ffffff' }}
