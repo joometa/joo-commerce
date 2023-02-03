@@ -25,7 +25,7 @@ model products {
   name String
   image_url String?
   category_id Int
-  contents String?
+  contents String? @db.VarChar(1000)
   price Int
   createdAt DateTime @default(now())
 
