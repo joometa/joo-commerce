@@ -78,8 +78,8 @@ export default function Home() {
   };
 
   return (
-    <div className="mt-36 mb-36">
-      <div className="mb-4">
+    <div className="mt-28 mb-36">
+      <div className="my-6">
         <Input
           icon={<IconSearch />}
           placeholder="Search"
@@ -88,7 +88,18 @@ export default function Home() {
         />
       </div>
 
-      <div className="mb-4">
+      <div className="flex justify-between mb-4">
+        {categories && (
+          <div className="mb-4">
+            <SegmentedControl
+              value={selectedCategories}
+              onChange={handleChangeCategory}
+              data={categoryOptions}
+              color="dark"
+            />
+          </div>
+        )}
+
         <Select
           value={selectedFilter}
           onChange={(value: string) => setSelectedFilter(value)}
@@ -96,16 +107,6 @@ export default function Home() {
         />
       </div>
 
-      {categories && (
-        <div className="mb-4">
-          <SegmentedControl
-            value={selectedCategories}
-            onChange={handleChangeCategory}
-            data={categoryOptions}
-            color="dark"
-          />
-        </div>
-      )}
       {products && (
         <div className="grid grid-cols-3 gap-5">
           {products.map((prod) => (
