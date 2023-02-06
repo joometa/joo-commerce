@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import { IconHeart, IconHome, IconShoppingCart, IconUser } from '@tabler/icons';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
@@ -38,7 +39,7 @@ export default function Header() {
     >
       <div
         className="w-full flex justify-end text-xs text-gray-400 pt-8pxr"
-        style={{ height: '30%' }}
+        style={{ height: '30%', cursor: 'pointer' }}
       >
         {session ? (
           <a onClick={handleClickLogout}>로그아웃</a>
@@ -51,7 +52,7 @@ export default function Header() {
         style={{ height: '70%' }}
       >
         <Image src="/images/logo.png" alt="logo" width={100} height={28} />
-        <div className="flex w-auto h-28pxr my-auto">
+        <IconGroup className="h-28pxr">
           <IconHome
             className="mr-30pxr"
             onClick={handleClickHome}
@@ -68,18 +69,33 @@ export default function Header() {
           />
 
           {session && (
-            <Image
-              className="ml-40pxr"
-              src={session.user?.image!}
-              alt="user-image"
-              width={30}
-              height={30}
-              style={{ borderRadius: '50%' }}
-              onClick={handleClickProfile}
-            />
+            <div className="w-172pxr ml-40pxr">
+              <Image
+                src={session.user?.image!}
+                alt="user-image"
+                width={28}
+                height={28}
+                style={{ borderRadius: '50%' }}
+                onClick={handleClickProfile}
+              />
+            </div>
           )}
-        </div>
+        </IconGroup>
       </div>
     </div>
   );
 }
+
+const IconGroup = styled.div`
+  display: flex;
+  width: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+  > * {
+    cursor: pointer;
+    transition: transform 150ms ease;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+`;
