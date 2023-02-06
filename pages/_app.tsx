@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SessionProvider } from 'next-auth/react';
 import Header from '@components/Header';
+import { Footer } from '@components/Footer';
 
 export default function App({
   Component,
@@ -25,6 +26,7 @@ export default function App({
           <div className="w-full max-w-7xl mx-auto mt-100pxr">
             <Component {...pageProps} />
           </div>
+          <Footer />
         </div>
       </QueryClientProvider>
     </SessionProvider>
