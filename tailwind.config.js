@@ -11,6 +11,7 @@ module.exports = {
   theme: {
     extend: {},
     spacing: {
+      0: 0,
       ...spacingArr.reduce((prev, cur) => {
         prev[`${cur}pxr`] = pxToRem(cur);
         return prev;
