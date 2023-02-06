@@ -14,7 +14,7 @@ export default function Products() {
   }, []);
 
   return (
-    <div className="px-36 mt-36 mb-36">
+    <div className="mx-auto mt-36 mb-36 max-w-7xl">
       {products && (
         <div className="grid grid-cols-3 gap-5">
           {products.map((prod) => (

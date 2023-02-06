@@ -6,7 +6,7 @@ export default function Google() {
   const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'undefined';
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', marginTop: '40%' }}>
       <GoogleOAuthProvider clientId={CLIENT_ID}>
         <GoogleLogin
           onSuccess={(credentialResponse) => {

@@ -1,13 +1,16 @@
 import { categories, products } from '@prisma/client';
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Input, Pagination } from '@mantine/core';
+import { Container, Input, Pagination, SimpleGrid } from '@mantine/core';
 import { TAKE, CATEGORY_MAP, FILTERS } from '@constants/products';
 import { SegmentedControl, Select } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
 import useDebounce from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
+import { ProductCard } from '@components/ProductCard';
+import { ProductCard as SProductsCard } from '@components/skeleton/ProductCard';
+import styled from '@emotion/styled';
 
 export default function Home() {
   const router = useRouter();
@@ -36,7 +39,7 @@ export default function Home() {
         .then((data) => Math.ceil(data.items / TAKE))
   );
 
-  const { data: products } = useQuery<
+  const { data: products, isLoading } = useQuery<
     { items: products[] },
     unknown,
     products[]
@@ -78,8 +81,8 @@ export default function Home() {
   };
 
   return (
-    <div className="mt-28 mb-36">
-      <div className="my-6">
+    <div className="w-full h-full pt-60pxr">
+      <div className="mb-40pxr">
         <Input
           icon={<IconSearch />}
           placeholder="Search"
@@ -88,9 +91,9 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex justify-between mb-4">
-        {categories && (
-          <div className="mb-4">
+      <div className="flex justify-between mb-40pxr">
+        {categories ? (
+          <div>
             <SegmentedControl
               value={selectedCategories}
               onChange={handleChangeCategory}
@@ -98,6 +101,8 @@ export default function Home() {
               color="dark"
             />
           </div>
+        ) : (
+          <div />
         )}
 
         <Select
@@ -107,37 +112,45 @@ export default function Home() {
         />
       </div>
 
-      {products && (
-        <div className="grid grid-cols-3 gap-5">
-          {products.map((prod) => (
-            <div
-              key={prod.id}
-              onClick={() => router.push(`/products/${prod.id}`)}
-            >
-              <Image
-                className="rounded"
-                src={prod.image_url ?? ''}
-                alt={prod.name}
-                width={320}
-                height={350}
-                placeholder="blur"
-                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNcu317PQAG0AKcthc3wwAAAABJRU5ErkJggg=="
-              />
+      <Container
+        py="xl"
+        style={{ width: '100%', maxWidth: '100%', padding: 0 }}
+      >
+        <SimpleGrid
+          cols={3}
+          breakpoints={[
+            { maxWidth: 'md', cols: 2 },
+            { maxWidth: 'xs', cols: 1 },
+          ]}
+        >
+          {isLoading &&
+            Array.from({ length: 9 }).map((_, idx) => (
+              <SProductsCard key={idx} />
+            ))}
 
-              <div className="flex">
-                <span>{prod.name}</span>
-                <span className="ml-auto">
-                  {prod.price.toLocaleString('ko-kr')}원
-                </span>
-              </div>
-              <span className="text-zinc-400">
-                {CATEGORY_MAP[prod.category_id - 1]}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="w-full flex mt-5">
+          {products &&
+            products.map((prod, idx) => (
+              <React.Fragment key={idx}>
+                <ProductCard data={prod} />
+              </React.Fragment>
+            ))}
+        </SimpleGrid>
+      </Container>
+
+      {!products ||
+        (products.length === 0 && (
+          <Empty>
+            <Image
+              src="/images/mood-empty.png"
+              alt="no-result"
+              width={120}
+              height={120}
+            />
+            <p className="pt-25pxr text-slate-400">검색된 결과가 없습니다.</p>
+          </Empty>
+        ))}
+
+      <div className="w-full flex my-80pxr">
         <Pagination
           className="m-auto"
           page={activePage}
@@ -148,3 +161,13 @@ export default function Home() {
     </div>
   );
 }
+
+const Empty = styled.div`
+  width: 100%;
+  height: 50vh;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;

@@ -1,5 +1,11 @@
 export const CATEGORY_MAP = ['Sneakers', 'T-Shirt', 'Pants', 'Cap', 'Hoodie'];
-
+export const CATEGORY_COLOR_MAP = [
+  'red',
+  'orange',
+  'yellow',
+  'indigo',
+  'violet',
+];
 export const TAKE = 9;
 
 export const FILTERS = [

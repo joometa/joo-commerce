@@ -20,9 +20,11 @@ export default function App({
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
-        <div className="px-36">
+        <div className="w-full h-full">
           <Header />
-          <Component {...pageProps} />
+          <div className="w-full max-w-7xl mx-auto mt-100pxr">
+            <Component {...pageProps} />
+          </div>
         </div>
       </QueryClientProvider>
     </SessionProvider>
