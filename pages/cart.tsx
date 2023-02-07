@@ -140,7 +140,7 @@ export default function CartPage() {
             <Button
               size="md"
               radius={8}
-              style={{ backgroundColor: '#2979ff' }}
+              style={{ backgroundColor: '#000' }}
               styles={{
                 root: { paddingRight: 14, height: 48 },
               }}

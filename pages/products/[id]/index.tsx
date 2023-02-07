@@ -4,12 +4,7 @@ import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
 import { Cart, Comment, OrderItem, products } from '@prisma/client';
 import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CustomEditor from 'components/Editor';
 import { format } from 'date-fns';
 import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
@@ -21,6 +16,7 @@ import Carousel from 'nuka-carousel';
 import { CART_QUERY_KEY } from 'pages/cart';
 import { ORDER_QUERY_KEY } from 'pages/my';
 import { useEffect, useMemo, useState } from 'react';
+import { easeCubicOut } from 'd3-ease';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const product = await fetch(
@@ -36,7 +32,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     .then((data) => data.items);
   return {
     props: {
-      product: { ...product, images: [product?.image_url, product?.image_url] },
+      product: {
+        ...product,
+        images: [product?.image_url, '/images/coming-soon.png'],
+      },
       comments: comments,
     },
   };
@@ -57,8 +56,6 @@ export default function Products({ ...props }: Props) {
   const { data: session } = useSession();
   const { id: productId } = router.query;
   const queryClient = useQueryClient();
-
-  console.log({ comments });
 
   const [editorState] = useState<EditorState | undefined>(() =>
     props.product.contents
@@ -213,124 +210,206 @@ export default function Products({ ...props }: Props) {
     validate('order');
   };
 
+  const totalCost = useMemo(() => {
+    if (product.price == null || quantity == null) return 0;
+    return product.price * quantity;
+  }, [quantity, product.price]);
+
+  console.log({ isWished });
+
   if (product == null || productId == null) {
     return <div>로딩중</div>;
   }
 
   return (
-    <div className="flex flex-row">
-      <div style={{ width: '50%', marginRight: 52 }}>
-        <Carousel
-          animation="zoom"
-          withoutControls
-          wrapAround
-          speed={3}
-          slideIndex={index}
-        >
-          {product &&
-            product.images.map((url, idx) => (
-              <Image
-                src={url}
-                key={`${url}-carousel-${idx}`}
-                alt="image"
-                width={1000}
-                height={1000}
-                layout="responsive"
-              />
-            ))}
-        </Carousel>
-        <div className="flex space-x-4 mt-2">
-          {product &&
-            product.images.map((url, idx) => (
-              <Image
-                src={url}
-                key={`${url}-image-${idx}`}
-                alt="image"
-                width={100}
-                height={100}
-                onClick={() => {
-                  setIndex(idx);
+    <>
+      <div className="flex flex-row  pt-80pxr divide-x divide-slate-200">
+        <div className="w-full pr-40pxr">
+          <Carousel
+            animation="fade"
+            withoutControls
+            wrapAround
+            easing={easeCubicOut}
+            speed={1}
+            slideIndex={index}
+          >
+            {product &&
+              product.images.map((url, idx) => (
+                <Image
+                  src={url}
+                  key={`${url}-carousel-${idx}`}
+                  alt="image"
+                  width={1000}
+                  height={1000}
+                  layout="responsive"
+                />
+              ))}
+          </Carousel>
+          <div className="flex mt-20pxr space-x-10pxr">
+            {product &&
+              product.images.map((url, idx) => (
+                <div
+                  className="flex items-center"
+                  key={`${url}-image-${idx}`}
+                  style={{
+                    borderRadius: '10px',
+                    marginLeft: idx === 0 ? '0' : '10px',
+                    height: '100%',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Image
+                    src={url}
+                    alt="image"
+                    width={80}
+                    height={80}
+                    onClick={() => {
+                      setIndex(idx);
+                    }}
+                  />
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* 상품 정보 */}
+        <div className="flex flex-col space-y-6 w-full pl-40pxr">
+          <div className="text-4xl font-semibold">{product.name}</div>
+
+          <section className="mt-25pxr mb-24pxr">
+            <h3 className="text-sm text-slate-400">상품설명</h3>
+            {editorState != null ? (
+              <CustomEditor editorState={editorState} readOnly />
+            ) : (
+              <div>내용 준비 중 입니다.</div>
+            )}
+          </section>
+
+          <section className="space-y-24pxr">
+            <div className="divide-y divide-slate-200 space-y-24pxr">
+              <div className="w-full h-56pxr flex justify-between items-center">
+                <span className="text-sm text-slate-400">수량</span>
+                <div
+                  className="flex justify-end h-full items-center"
+                  style={{}}
+                >
+                  <CountControl
+                    value={quantity}
+                    setValue={setQuantity}
+                    max={200}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full h-56pxr flex justify-between items-center">
+                <span className="text-sm text-slate-400">금액</span>
+                <div
+                  className="flex justify-end h-full items-center font-semibold"
+                  style={{}}
+                >
+                  {product.price.toLocaleString('ko-kr')}원
+                </div>
+              </div>
+
+              <div className="w-full h-90pxr flex justify-between items-center">
+                <span className="text-sm text-slate-400">총금액</span>
+                <div
+                  className="flex justify-end h-full items-center font-semibold text-xl"
+                  style={{}}
+                >
+                  <div className="flex flex-col items-end">
+                    <span className="text-blue-400 font-light text-xs">{`${
+                      product.price.toLocaleString('ko-kr') ?? 0
+                    } * ${quantity ?? 1}`}</span>
+                    {totalCost.toLocaleString('ko-kr')}원
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-15pxr w-full">
+              <Button
+                disabled={wishlist == null}
+                leftIcon={<IconShoppingCart size={20} stroke={1.5} />}
+                style={{
+                  backgroundColor: '#2979ff',
+                  height: '48px',
+                  width: '50%',
                 }}
-              />
-            ))}
+                size="md"
+                radius={8}
+                onClick={handleClickCart}
+              >
+                장바구니
+              </Button>
+              <Button
+                disabled={wishlist == null}
+                leftIcon={
+                  isWished ? (
+                    <IconHeart size={20} stroke={1.5} />
+                  ) : (
+                    <IconHeartbeat size={20} stroke={1.5} />
+                  )
+                }
+                style={{
+                  backgroundColor: isWished ? 'lightgray' : '#f05650',
+                  height: '48px',
+                  width: '50%',
+                }}
+                size="md"
+                radius={8}
+                onClick={handleClickWish}
+              >
+                찜하기
+              </Button>
+            </div>
+            <Button
+              style={{
+                // backgroundColor: '#2979ff',
+                backgroundColor: '#000',
+                height: '48px',
+                width: '100%',
+              }}
+              size="md"
+              radius={8}
+              onClick={handleClickOrder}
+            >
+              구매하기
+            </Button>
+          </section>
+
+          <div
+            className="mt-100pxr flex justify-between py-20pxr text-sm"
+            style={{
+              border: '1px solid rgb(226,232,240,1)',
+              borderRight: 'none',
+              borderLeft: 'none',
+            }}
+          >
+            <div className="text-slate-400">상품 정보</div>
+            <div className="flex justify-between" style={{ width: '50%' }}>
+              <div>
+                <span className="text-slate-400">분류</span>
+                <p>{CATEGORY_MAP[product.category_id - 1]}</p>
+              </div>
+              <div>
+                <span className="text-slate-400">등록일</span>
+                <p>{format(new Date(product.createdAt), 'yy/MM/dd')}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        {editorState != null && (
-          <CustomEditor editorState={editorState} readOnly />
+      </div>
+      <div className="my-40pxr">
+        <p className="text-2xl font-semibold">후기</p>
+        {comments && comments.length > 0 ? (
+          comments.map((comment, idx) => (
+            <CommentItem key={idx} item={comment} />
+          ))
+        ) : (
+          <div>등록된 후기가 없습니다.</div>
         )}
-        <div>
-          <p className="text-2xl font-semibold mb-2">후기</p>
-          {comments && comments.length > 0 ? (
-            comments.map((comment, idx) => (
-              <CommentItem key={idx} item={comment} />
-            ))
-          ) : (
-            <div>등록된 후기가 없습니다.</div>
-          )}
-        </div>
       </div>
-      <div className="flex flex-col space-y-6">
-        <div className="text-lg text-zinc-400">
-          {CATEGORY_MAP[product.category_id - 1]}
-        </div>
-        <div className="text-4xl font-semibold">{product.name}</div>
-        <div className="text-lg">{product.price.toLocaleString('ko-kr')}원</div>
-
-        <div className="text-lg">
-          <span>수량</span>
-          <CountControl value={quantity} setValue={setQuantity} max={200} />
-        </div>
-
-        <div className="flex space-x-3">
-          <Button
-            disabled={wishlist == null}
-            leftIcon={<IconShoppingCart size={20} stroke={1.5} />}
-            style={{ backgroundColor: '#2979ff' }}
-            size="md"
-            radius={8}
-            styles={{
-              root: { paddingRight: 14, height: 48 },
-            }}
-            onClick={handleClickCart}
-          >
-            장바구니
-          </Button>
-          <Button
-            disabled={wishlist == null}
-            leftIcon={
-              isWished ? (
-                <IconHeart size={20} stroke={1.5} />
-              ) : (
-                <IconHeartbeat size={20} stroke={1.5} />
-              )
-            }
-            style={{ backgroundColor: isWished ? '#f05650' : 'lightgray' }}
-            size="md"
-            radius={8}
-            styles={{
-              root: { paddingRight: 14, height: 48 },
-            }}
-            onClick={handleClickWish}
-          >
-            찜하기
-          </Button>
-        </div>
-
-        <Button
-          style={{ backgroundColor: '#2979ff' }}
-          size="md"
-          radius={8}
-          styles={{
-            root: { paddingRight: 14, height: 48 },
-          }}
-          onClick={handleClickOrder}
-        >
-          구매하기
-        </Button>
-
-        <div className="text-sm text-zinc-300">
-          등록 : {format(new Date(product.createdAt), 'yyyy년 M월 d일')}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

@@ -14,8 +14,9 @@ async function getWishlist(userId: string) {
         userId: userId,
       },
     });
-
-    return response?.productIds.split(',');
+    const result =
+      response?.productIds == null ? [] : response.productIds.split(',');
+    return result;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);
   }

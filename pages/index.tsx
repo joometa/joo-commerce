@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { ProductCard } from '@components/ProductCard';
 import { ProductCard as SProductsCard } from '@components/skeleton/ProductCard';
 import styled from '@emotion/styled';
+import Main from '@components/layout/Main';
 
 export default function Home() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full h-full pt-60pxr">
+    <Main>
       <div className="mb-40pxr">
         <Input
           icon={<IconSearch />}
@@ -129,11 +130,7 @@ export default function Home() {
             ))}
 
           {products &&
-            products.map((prod, idx) => (
-              <React.Fragment key={idx}>
-                <ProductCard data={prod} />
-              </React.Fragment>
-            ))}
+            products.map((prod, idx) => <ProductCard key={idx} data={prod} />)}
         </SimpleGrid>
       </Container>
 
@@ -158,7 +155,7 @@ export default function Home() {
           total={total}
         />
       </div>
-    </div>
+    </Main>
   );
 }
 

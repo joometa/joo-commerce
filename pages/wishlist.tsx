@@ -1,12 +1,15 @@
-import { CATEGORY_MAP } from '@constants/products';
+import { Container, SimpleGrid } from '@mantine/core';
 import { products } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { ProductCard as SProductsCard } from '@components/skeleton/ProductCard';
+import { ProductCard } from '@components/ProductCard';
+import { useEffect } from 'react';
+import Main from '@components/layout/Main';
 
 export default function Wishlist() {
   const router = useRouter();
-  const { data: products } = useQuery<
+  const { data: products, isLoading } = useQuery<
     { items: products[] },
     unknown,
     products[]
@@ -19,39 +22,48 @@ export default function Wishlist() {
     { select: (data) => data.items }
   );
 
-  return (
-    <div>
-      <p className="text-2xl mb-4">내가 찜한 상품</p>
-      {products && (
-        <div className="grid grid-cols-3 gap-5">
-          {products.map((prod) => (
-            <div
-              key={prod.id}
-              onClick={() => router.push(`/products/${prod.id}`)}
-            >
-              <Image
-                className="rounded"
-                src={prod.image_url ?? ''}
-                alt={prod.name}
-                width={320}
-                height={350}
-                placeholder="blur"
-                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNcu317PQAG0AKcthc3wwAAAABJRU5ErkJggg=="
-              />
-
-              <div className="flex">
-                <span>{prod.name}</span>
-                <span className="ml-auto">
-                  {prod.price.toLocaleString('ko-kr')}원
-                </span>
-              </div>
-              <span className="text-zinc-400">
-                {CATEGORY_MAP[prod.category_id - 1]}
-              </span>
-            </div>
-          ))}
+  if (products && products.length === 0) {
+    return (
+      <Main>
+        <p className="text-2xl mb-4 font-semibold">내가 찜한 상품</p>
+        <div
+          className="flex justify-center items-center "
+          style={{
+            marginTop: '30px',
+            height: '30vh',
+            borderRadius: '25px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.23)',
+          }}
+        >
+          찜한 상품이 없습니다.
         </div>
-      )}
-    </div>
+      </Main>
+    );
+  }
+
+  return (
+    <Main>
+      <p className="text-2xl mb-4 font-semibold">내가 찜한 상품</p>
+      <Container
+        py="xl"
+        style={{ width: '100%', maxWidth: '100%', padding: 0 }}
+      >
+        <SimpleGrid
+          cols={3}
+          breakpoints={[
+            { maxWidth: 'md', cols: 2 },
+            { maxWidth: 'xs', cols: 1 },
+          ]}
+        >
+          {isLoading &&
+            Array.from({ length: 9 }).map((_, idx) => (
+              <SProductsCard key={idx} />
+            ))}
+
+          {products &&
+            products.map((prod, idx) => <ProductCard key={idx} data={prod} />)}
+        </SimpleGrid>
+      </Container>
+    </Main>
   );
 }

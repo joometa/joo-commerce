@@ -3,8 +3,8 @@ import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SessionProvider } from 'next-auth/react';
-import Header from '@components/Header';
-import { Footer } from '@components/Footer';
+import Header from '@components/layout/Header';
+import { Footer } from '@components/layout/Footer';
 
 export default function App({
   Component,
@@ -23,7 +23,10 @@ export default function App({
       <QueryClientProvider client={queryClient}>
         <div className="w-full h-full">
           <Header />
-          <div className="w-full max-w-7xl mx-auto mt-100pxr">
+          <div
+            className="w-full max-w-7xl mx-auto mt-100pxr"
+            style={{ minHeight: '75vh' }}
+          >
             <Component {...pageProps} />
           </div>
           <Footer />
