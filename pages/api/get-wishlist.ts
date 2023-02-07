@@ -15,8 +15,6 @@ async function getWishlist(userId: string) {
       },
     });
 
-    console.log(response);
-
     return response?.productIds.split(',');
   } catch (err) {
     console.error(`ERROR에요! :${err}`);

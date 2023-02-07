@@ -40,7 +40,6 @@ async function updateComment({
         images,
       },
     });
-    console.log(response);
 
     return response;
   } catch (err) {

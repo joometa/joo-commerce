@@ -37,7 +37,6 @@ async function updateWishlist(userId: string, productId: string) {
         productIds: newWishlist.join(','),
       },
     });
-    console.log(response);
 
     return response?.productIds.split(',');
   } catch (err) {

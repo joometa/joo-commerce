@@ -15,7 +15,6 @@ async function updateOrderStatus(id: number, status: number) {
         status: status,
       },
     });
-    console.log(response);
 
     return response;
   } catch (err) {

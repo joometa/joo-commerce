@@ -12,7 +12,7 @@ async function getComment(userId: string, orderItemId: number) {
         orderItemId: orderItemId,
       },
     });
-    console.log(response);
+
     if (response?.userId === userId) {
       return response;
     }

@@ -27,7 +27,6 @@ async function addCart(userId: string, item: Omit<Cart, 'id' | 'userId'>) {
         ...item,
       },
     });
-    console.log(response);
 
     return response;
   } catch (err) {

@@ -18,7 +18,6 @@ async function updateCart(item: Cart) {
         amount: item.amount,
       },
     });
-    console.log(response);
 
     return response;
   } catch (err) {

@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 async function getCategories() {
   try {
     const response = await prisma.categories.findMany({});
-    console.log(response);
+
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);

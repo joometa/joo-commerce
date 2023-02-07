@@ -12,7 +12,7 @@ async function getProduct(id: number) {
         id: id,
       },
     });
-    console.log(response);
+
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);

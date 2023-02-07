@@ -14,7 +14,6 @@ async function deleteCart(id: number) {
         id: id,
       },
     });
-    console.log(response);
 
     return response;
   } catch (err) {
