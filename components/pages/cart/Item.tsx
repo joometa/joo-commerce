@@ -38,7 +38,7 @@ export function Item({ data, onDelete, onUpdate }: Props) {
   }, [quantity, data.price]);
 
   return (
-    <Wrapper className="">
+    <Wrapper>
       <Image
         src={data.image_url}
         width={150}

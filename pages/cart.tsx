@@ -8,6 +8,7 @@ import { ProductCard as SProductsCard } from '@components/skeleton/ProductCard';
 import { ProductCard } from '@components/ProductCard';
 import * as C from '@components/pages/cart';
 import { CartItem } from '@components/pages/cart/types';
+import { CartItem as SCartItem } from '@components/skeleton/CartItem';
 
 export const CART_QUERY_KEY = '/api/get-cart';
 
@@ -16,7 +17,7 @@ export default function CartPage() {
   const queryClient = useQueryClient();
   const RECOMM_ITEM_COUNT = 4;
 
-  const { data: cartItems } = useQuery<
+  const { data: cartItems, isLoading: isLoadingCartItem } = useQuery<
     { items: CartItem[] },
     unknown,
     CartItem[]
@@ -164,8 +165,11 @@ export default function CartPage() {
         style={{ minHeight: '50vh' }}
       >
         <div className="w-full sm:w-1/2 p-14pxr">
-          {cartItems ? (
-            cartItems.length > 0 ? (
+          {isLoadingCartItem &&
+            Array.from({ length: 3 }).map((_, idx) => <SCartItem key={idx} />)}
+
+          {cartItems &&
+            (cartItems.length > 0 ? (
               cartItems.map((item, idx) => (
                 <C.Item
                   key={idx}
@@ -176,10 +180,7 @@ export default function CartPage() {
               ))
             ) : (
               <div>장바구니함이 비었습니다.</div>
-            )
-          ) : (
-            <div>불러오는 중..</div>
-          )}
+            ))}
         </div>
 
         <div className="p-15pxr w-full sm:w-1/2">
