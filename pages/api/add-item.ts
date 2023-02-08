@@ -23,7 +23,6 @@ async function addItem(name: string) {
         ],
       },
     });
-    console.log('RESPONSE :', response);
   } catch (err) {
     console.error(`ERROR에요! :${JSON.stringify(err)}`);
   }

@@ -11,7 +11,7 @@ async function getCart(userId: string) {
   try {
     const cart =
       await prisma.$queryRaw`SELECT c.id, userId, quantity, amount, price, name, image_url, productId FROM Cart as c JOIN products as p WHERE c.productId=p.id AND userId=${userId}`;
-    // console.log(cart);
+
     return cart;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);

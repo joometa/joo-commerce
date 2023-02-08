@@ -15,7 +15,6 @@ async function getOrder(userId: string) {
         userId: userId,
       },
     });
-    console.log({ myOrders });
 
     let response = [];
 
@@ -30,7 +29,7 @@ async function getOrder(userId: string) {
       }
       response.push({ ...order, orderItems });
     }
-    console.log({ response });
+
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);

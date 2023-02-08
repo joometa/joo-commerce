@@ -39,7 +39,7 @@ async function getProducts({
       where,
       ...orderByCondition,
     });
-    console.log({ where });
+
     return response;
   } catch (err) {
     console.error(`ERROR에요! :${err}`);
@@ -56,7 +56,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const { skip, take, category, orderBy, contains } = req.query;
-  console.log(req.query);
+
   if (skip == null || take == null) {
     res.status(400).json({ message: 'Check query parameters plz' });
     return;
