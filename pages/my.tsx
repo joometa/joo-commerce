@@ -61,9 +61,49 @@ export default function MyPage() {
       },
     }
   );
+  const { mutate: fetchDeleteOrder } = useMutation<
+    unknown,
+    unknown,
+    number,
+    any
+  >(
+    (id) =>
+      fetch('/api/delete-order', {
+        method: 'POST',
+        body: JSON.stringify({
+          id: id,
+        }),
+      })
+        .then((res) => res.json())
+        .then((res) => res.items),
+    {
+      onMutate: async (id) => {
+        await queryClient.cancelQueries([ORDER_QUERY_KEY]);
+
+        const previous = queryClient.getQueryData([ORDER_QUERY_KEY]);
+        queryClient.setQueryData<OrderDetail[]>([ORDER_QUERY_KEY], (old) =>
+          old?.filter((c) => c.id !== id)
+        );
+
+        return { previous };
+      },
+      onError: (err, _, context) => {
+        queryClient.setQueryData([ORDER_QUERY_KEY], context?.previous);
+      },
+      onSuccess: () => {
+        alert('주문정보가 삭제되었습니다.');
+        queryClient.invalidateQueries([ORDER_QUERY_KEY]);
+      },
+    }
+  );
 
   const handleCompletePayment = (data: OrderDetail) => {
     fetchUpdateOrderStatus(data);
+  };
+
+  const handleDeleteOrder = (id: number) => {
+    console.log('handle', { id }, typeof id);
+    fetchDeleteOrder(id);
   };
 
   return (
@@ -80,6 +120,7 @@ export default function MyPage() {
                   key={idx}
                   data={item}
                   onCompletePay={handleCompletePayment}
+                  onDelete={handleDeleteOrder}
                 />
               ))
             ) : (

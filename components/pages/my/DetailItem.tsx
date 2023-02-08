@@ -2,13 +2,14 @@ import { Badge, Button } from '@mantine/core';
 import { IconX } from '@tabler/icons';
 import { Item } from './Item';
 import { format } from 'date-fns';
-import { OrderDetail, OnCompletePayParams } from './types';
+import { OrderDetail } from './types';
 import { useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 
 interface Props {
   data: OrderDetail;
   onCompletePay: (params: OrderDetail) => void;
+  onDelete: (id: number) => void;
 }
 
 const ORDER_STATUS_MAP = [
@@ -25,20 +26,21 @@ const ORDER_STATUS_MAP = [
   '반품완료',
 ];
 
-export function DetailItem({ data, onCompletePay }: Props) {
+export function DetailItem({ data, onCompletePay, onDelete }: Props) {
   const handleClickPay = async () => {
     onCompletePay(data);
   };
 
-  const isPayed = useMemo(() => {
-    return data.status === 5;
-  }, [data.status]);
+  const handleDelete = () => {
+    console.log(typeof data.id, data.id);
+    onDelete(data.id);
+  };
 
   return (
     <Wrapper>
       <div className="flex pb-12pxr">
         <Badge className="mb-2">{ORDER_STATUS_MAP[data.status + 1]}</Badge>
-        <IconX className="ml-auto" />
+        <IconX className="ml-auto cursor-pointer" onClick={handleDelete} />
       </div>
 
       <div className="flex flex-col space-x-30pxr sm:flex-row">
