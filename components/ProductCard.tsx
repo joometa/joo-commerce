@@ -1,11 +1,9 @@
 import { CATEGORY_MAP, CATEGORY_COLOR_MAP } from '@constants/products';
 import {
   createStyles,
-  SimpleGrid,
   Card,
   Image,
   Text,
-  Container,
   AspectRatio,
   Badge,
 } from '@mantine/core';

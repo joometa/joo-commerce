@@ -1,11 +1,11 @@
 import CommentItem from '@components/CommentItem';
-import { CountControl } from '@components/CountControl';
+import { CountControl } from '@components/common/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import { Button } from '@mantine/core';
 import { Cart, Comment, OrderItem, products } from '@prisma/client';
 import { IconHeart, IconHeartbeat, IconShoppingCart } from '@tabler/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import CustomEditor from 'components/Editor';
+import CustomEditor from '@components/common/Editor';
 import { format } from 'date-fns';
 import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import { GetServerSideProps } from 'next';
@@ -215,8 +215,6 @@ export default function Products({ ...props }: Props) {
     return product.price * quantity;
   }, [quantity, product.price]);
 
-  console.log({ isWished });
-
   if (product == null || productId == null) {
     return <div>로딩중</div>;
   }
@@ -289,10 +287,7 @@ export default function Products({ ...props }: Props) {
             <div className="divide-y divide-slate-200 space-y-24pxr">
               <div className="w-full h-56pxr flex justify-between items-center">
                 <span className="text-sm text-slate-400">수량</span>
-                <div
-                  className="flex justify-end h-full items-center"
-                  style={{}}
-                >
+                <div className="flex justify-end h-full items-center">
                   <CountControl
                     value={quantity}
                     setValue={setQuantity}
@@ -303,20 +298,14 @@ export default function Products({ ...props }: Props) {
 
               <div className="w-full h-56pxr flex justify-between items-center">
                 <span className="text-sm text-slate-400">금액</span>
-                <div
-                  className="flex justify-end h-full items-center font-semibold"
-                  style={{}}
-                >
+                <div className="flex justify-end h-full items-center font-semibold">
                   {product.price.toLocaleString('ko-kr')}원
                 </div>
               </div>
 
               <div className="w-full h-90pxr flex justify-between items-center">
                 <span className="text-sm text-slate-400">총금액</span>
-                <div
-                  className="flex justify-end h-full items-center font-semibold text-xl"
-                  style={{}}
-                >
+                <div className="flex justify-end h-full items-center font-semibold text-xl">
                   <div className="flex flex-col items-end">
                     <span className="text-blue-400 font-light text-xs">{`${
                       product.price.toLocaleString('ko-kr') ?? 0

@@ -1,4 +1,4 @@
-import { CountControl } from '@components/CountControl';
+import { CountControl } from '@components/common/CountControl';
 import { CATEGORY_MAP } from '@constants/products';
 import styled from '@emotion/styled';
 import { Badge, Button } from '@mantine/core';

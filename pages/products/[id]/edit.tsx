@@ -1,4 +1,4 @@
-import CustomEditor from 'components/Editor';
+import CustomEditor from '@components/common/Editor';
 import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import Image from 'next/image';
 import { useRouter } from 'next/router';

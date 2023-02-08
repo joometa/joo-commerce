@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { ProductCard as SProductsCard } from '@components/skeleton/ProductCard';
 import { ProductCard } from '@components/ProductCard';
-import { useEffect } from 'react';
 import Main from '@components/layout/Main';
 
 export default function Wishlist() {
@@ -25,7 +24,7 @@ export default function Wishlist() {
   if (products && products.length === 0) {
     return (
       <Main>
-        <p className="text-2xl mb-4 font-semibold">내가 찜한 상품</p>
+        <h1 className="text-2xl mb-4 font-semibold">내가 찜한 상품</h1>
         <div
           className="flex justify-center items-center "
           style={{
@@ -43,7 +42,7 @@ export default function Wishlist() {
 
   return (
     <Main>
-      <p className="text-2xl mb-4 font-semibold">내가 찜한 상품</p>
+      <h1 className="text-2xl mb-4 font-semibold">내가 찜한 상품</h1>
       <Container
         py="xl"
         style={{ width: '100%', maxWidth: '100%', padding: 0 }}

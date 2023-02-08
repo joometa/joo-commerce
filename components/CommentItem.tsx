@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { IconStar } from '@tabler/icons';
 import { CommentItemType } from 'pages/products/[id]';
-import CustomEditor from './Editor';
+import CustomEditor from './common/Editor';
 import { EditorState, convertFromRaw } from 'draft-js';
 import { format } from 'date-fns';
 import AutoSizeImage from './AutoSizeImage';
