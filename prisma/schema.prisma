@@ -122,6 +122,7 @@ model Orders {
 model Comment {
   id Int @id @default(autoincrement())
   userId String
+  userName String
   orderItemId Int @unique
   rate Int
   contents String?
