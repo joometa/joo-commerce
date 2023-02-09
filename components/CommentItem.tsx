@@ -18,13 +18,22 @@ export default function CommentItem({ item }: Props) {
           <div className="flex w-full justify-between mb-15pxr">
             <div className="flex w-full">
               <div className="flex w-auto mr-20pxr items-center p-14pxr">
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <IconStar
-                    key={idx}
-                    fill={idx < item.rate ? 'red' : 'none'}
-                    stroke={idx < item.rate ? 0 : 1}
-                  />
-                ))}
+                <div className="flex flex-col">
+                  <div className="flex">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <IconStar
+                        key={idx}
+                        fill={idx < item.rate ? 'red' : 'none'}
+                        stroke={idx < item.rate ? 0 : 1}
+                      />
+                    ))}
+                  </div>
+                  {item.userName && item.userName.length > 0 && (
+                    <span className="text-gray-400 pt-10pxr">
+                      {item.userName}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex justify-start">
                 <CustomEditor

@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 
 interface UpdateCommentParams {
   userId: string;
+  userName: string;
   orderItemId: number;
   rate: number;
   contents: string;
@@ -17,6 +18,7 @@ interface UpdateCommentParams {
 
 async function updateComment({
   userId,
+  userName,
   orderItemId,
   rate,
   contents,
@@ -34,6 +36,7 @@ async function updateComment({
       },
       create: {
         userId,
+        userName,
         contents,
         rate,
         orderItemId,
@@ -64,9 +67,11 @@ export default async function handler(
     return;
   }
 
+  console.log({ session });
   try {
     const wishlist = await updateComment({
       userId: String(session.id),
+      userName: session?.user?.name ? String(session.user.name) : 'anonymous',
       orderItemId: orderItemId,
       rate: rate,
       contents: contents,
