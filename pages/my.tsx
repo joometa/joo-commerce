@@ -102,7 +102,6 @@ export default function MyPage() {
   };
 
   const handleDeleteOrder = (id: number) => {
-    console.log('handle', { id }, typeof id);
     fetchDeleteOrder(id);
   };
 

@@ -13,7 +13,9 @@ export function Item({ data }: Props) {
   const TOTAL_COST = (data.price * data.quantity).toLocaleString('ko-kr');
 
   const handleClickComment = () => {
-    router.push(`/comment/edit?orderItemId=${data.id}`);
+    router.push(
+      `/comment/edit?orderItemId=${data.id}&productId=${data.productId}`
+    );
   };
 
   return (

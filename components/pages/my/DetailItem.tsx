@@ -32,7 +32,6 @@ export function DetailItem({ data, onCompletePay, onDelete }: Props) {
   };
 
   const handleDelete = () => {
-    console.log(typeof data.id, data.id);
     onDelete(data.id);
   };
 
