@@ -354,7 +354,6 @@ export default function Products({ ...props }: Props) {
             </div>
             <Button
               style={{
-                // backgroundColor: '#2979ff',
                 backgroundColor: '#000',
                 height: '48px',
                 width: '100%',
@@ -389,8 +388,12 @@ export default function Products({ ...props }: Props) {
           </div>
         </div>
       </div>
-      <div className="my-40pxr">
-        <p className="text-2xl font-semibold">후기</p>
+
+      {/* 후기 섹션 */}
+      <div className="mt-70pxr mb-40pxr">
+        <p className="text-2xl font-semibold mb-30pxr">
+          상품 후기 {comments && `(${comments.length})`}
+        </p>
         {comments && comments.length > 0 ? (
           comments.map((comment, idx) => (
             <CommentItem key={idx} item={comment} />

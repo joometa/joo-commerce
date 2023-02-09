@@ -15,30 +15,39 @@ export default function CommentItem({ item }: Props) {
     <Wrapper>
       <div>
         <div style={{ display: 'flex' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex' }}>
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <IconStar
-                  key={idx}
-                  fill={idx < item.rate ? 'red' : 'none'}
-                  stroke={idx < item.rate ? 0 : 1}
+          <div className="flex w-full justify-between mb-15pxr">
+            <div className="flex w-full">
+              <div className="flex w-auto mr-20pxr items-center p-14pxr">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <IconStar
+                    key={idx}
+                    fill={idx < item.rate ? 'red' : 'none'}
+                    stroke={idx < item.rate ? 0 : 1}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-start">
+                <CustomEditor
+                  editorState={EditorState.createWithContent(
+                    convertFromRaw(JSON.parse(item.contents ?? ''))
+                  )}
+                  readOnly
+                  noPadding
                 />
-              ))}
+              </div>
+            </div>
+            <div className="w-150pxr flex justify-end items-center pr-14pxr">
+              <p className="text-zinc-500 ml-auto">
+                {format(new Date(item.updatedAt), 'yyyy-MM-dd')}
+              </p>
             </div>
           </div>
-          <p className="text-zinc-500 ml-auto">
-            {format(new Date(item.updatedAt), 'yyyy년 M월 d일')}
-          </p>
         </div>
-        <CustomEditor
-          editorState={EditorState.createWithContent(
-            convertFromRaw(JSON.parse(item.contents ?? ''))
-          )}
-          readOnly
-          noPadding
-        />
       </div>
-      <div className="flex">
+      <div
+        className="flex w-full p-10pxr space-x-10pxr"
+        style={{ borderTop: '1px dotted lightgray' }}
+      >
         {item.images?.split(',').map((image, idx) => (
           <AutoSizeImage key={idx} src={image} size={150} />
         ))}
@@ -48,7 +57,7 @@ export default function CommentItem({ item }: Props) {
 }
 
 const Wrapper = styled.div`
-  border: 1px solid black;
+  border: 1px solid lightgray;
   border-radius: 8px;
   padding: 8px;
 `;
