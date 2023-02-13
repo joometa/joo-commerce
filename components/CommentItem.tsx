@@ -28,7 +28,7 @@ export default function CommentItem({ item }: Props) {
                       />
                     ))}
                   </div>
-                  {item.userName && item.userName.length > 0 && (
+                  {item?.userName != null && item.userName.length > 0 && (
                     <span className="text-gray-400 pt-10pxr">
                       {item.userName}
                     </span>
