@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Client } from '@notionhq/client';
 import { PrismaClient } from '@prisma/client';
 import jwtDecode from 'jwt-decode';
 
